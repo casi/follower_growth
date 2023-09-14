@@ -1,6 +1,21 @@
 import argparse
 import random
+import signal
 import time
+
+
+def signal_handler(signum, frame):
+    """
+    Handle signal for clean termination.
+
+    Parameters:
+    - signum: Signal number
+    - frame: Current stack frame
+
+    Returns:
+    None
+    """
+    raise SystemExit("Simulation terminated by user.")
 
 
 def simulate_follower_growth(initial_followers, random_range_start, random_range_end):
@@ -16,21 +31,33 @@ def simulate_follower_growth(initial_followers, random_range_start, random_range
     None
     """
     current_followers = initial_followers
+    total_new_followers = 0
+    cycles = 0
 
     print(f"Starting with {initial_followers} followers.")
 
-    while True:
-        # Generate a random number of new followers within the specified range
-        new_followers = random.randint(random_range_start, random_range_end)
+    try:
+        while True:
+            # Generate a random number of new followers within the specified range
+            new_followers = random.randint(
+                random_range_start, random_range_end)
 
-        # Update the current number of followers
-        current_followers += new_followers
+            # Update the current number of followers
+            current_followers += new_followers
+            total_new_followers += new_followers
+            cycles += 1
 
-        print(
-            f"New followers: {new_followers}, Total followers: {current_followers}")
+            print(
+                f"New followers: {new_followers}, Total followers: {current_followers}")
 
-        # Pause for 2 seconds before simulating the next cycle
-        time.sleep(2)
+            # Pause for 5 seconds before simulating the next cycle
+            time.sleep(5)
+    except SystemExit:
+        print("\n--- Simulation Summary ---")
+        print(f"Initial followers: {initial_followers}")
+        print(f"Total new followers gained: {total_new_followers}")
+        print(f"Final number of followers: {current_followers}")
+        print(f"Simulation cycles completed: {cycles}")
 
 
 if __name__ == "__main__":
@@ -54,7 +81,9 @@ if __name__ == "__main__":
         print("Error: The starting value of the random range must be less than or equal to the ending value.")
         exit(1)
 
+    # Register signal handler for clean termination
+    signal.signal(signal.SIGINT, signal_handler)
+
     # Run the simulation with the parsed arguments
     simulate_follower_growth(args.initial_followers,
                              args.random_range_start, args.random_range_end)
-
