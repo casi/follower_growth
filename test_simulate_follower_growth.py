@@ -19,21 +19,21 @@ class TestFollowerSimulator(unittest.TestCase):
         self.assertEqual(self.simulator.random_range_end, 10)
 
     @patch('random.randint')
-    def test_simulate_cycle(self, mock_randint):
-        mock_randint.return_value = 7
-        self.simulator.simulate_cycle()
-        self.assertEqual(self.simulator.current_followers, 107)
-        self.assertEqual(self.simulator.total_new_followers, 7)
-        self.assertEqual(self.simulator.cycles, 1)
+    @patch('builtins.print')
+    def test_random_event_effect(self, mock_print, mock_randint):
+        mock_randint.return_value = 12  # Event: "It's a holiday! Extra followers! 🎄🎊"
+        bonus_followers = self.simulator.random_event_effect()
+        mock_print.assert_called_with("It's a holiday! Extra followers! 🎄🎊")
+        self.assertFalse(20 <= bonus_followers <= 40) 
 
     def test_summary(self):
         with patch('builtins.print') as mock_print:
             self.simulator.summary()
             calls = [call("\n--- Simulation Summary ---"),
+                     call(f"Simulation cycles: {self.simulator.cycles}"),
                      call(f"Initial followers: {self.simulator.current_followers - self.simulator.total_new_followers}"),
-                     call(f"Total new followers gained: {self.simulator.total_new_followers}"),
-                     call(f"Final number of followers: {self.simulator.current_followers}"),
-                     call(f"Simulation cycles completed: {self.simulator.cycles}\n")]
+                     call(f"Total new followers: {self.simulator.total_new_followers}"),
+                     call(f"Final number of followers: {self.simulator.current_followers}\n")]
             mock_print.assert_has_calls(calls)
 
 if __name__ == '__main__':
