@@ -1,7 +1,5 @@
 import unittest
-from unittest.mock import patch
-
-from mock import call
+from unittest.mock import call, patch
 
 from simulate_follower_growth import FollowerSimulator
 
@@ -18,13 +16,20 @@ class TestFollowerSimulator(unittest.TestCase):
         self.assertEqual(self.simulator.random_range_start, 5)
         self.assertEqual(self.simulator.random_range_end, 10)
 
+    def test_simulate_cycle(self):
+        self.assertEqual(self.simulator.current_followers, 100)
+        self.simulator.simulate_cycle()
+        self.assertEqual(self.simulator.cycles, 1)
+        self.assertGreater(self.simulator.current_followers, 100)
+        self.assertGreaterEqual(self.simulator.total_new_followers, 5)
+
     @patch('random.randint')
     @patch('builtins.print')
     def test_random_event_effect(self, mock_print, mock_randint):
         mock_randint.return_value = 12  # Event: "It's a holiday! Extra followers! 🎄🎊"
         bonus_followers = self.simulator.random_event_effect()
         mock_print.assert_called_with("It's a holiday! Extra followers! 🎄🎊")
-        self.assertFalse(20 <= bonus_followers <= 40) 
+        self.assertFalse(20 <= bonus_followers <= 40)
 
     def test_summary(self):
         with patch('builtins.print') as mock_print:
