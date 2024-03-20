@@ -13,8 +13,6 @@ EVENTS = {
     (21, 22): ("You sponsored a post! 💰", (500, 1000))
 }
 
-current_line = ""
-
 # Class to simulate follower growth on a social network
 class FollowerSimulator:
     def __init__(self, initial_followers: int, random_range_start: int, random_range_end: int) -> None:
@@ -30,6 +28,8 @@ class FollowerSimulator:
         self.random_range_start = random_range_start
         # End of random range for follower growth
         self.random_range_end = random_range_end
+        # Current line to clear
+        self.current_line: str = ""
 
     # Simulate a single cycle of follower growth
     def simulate_cycle(self) -> None:
@@ -40,10 +40,9 @@ class FollowerSimulator:
         self.cycles += 1
 
         # Format the new follower count
-        global current_line
-        current_line = f"New followers: {new_followers}, Total followers: {self.current_followers}{' ' * 10}"
+        self.current_line = f"New followers: {new_followers}, Total followers: {self.current_followers}{' ' * 10}"
         # Clear the line before and print the new follower count
-        print('\r\033[K' + current_line, end='\r')
+        print('\r\033[K' + self.current_line, end='\r')
 
     # Random events with impact over the follower count
     def random_event_effect(self) -> int:
@@ -57,17 +56,19 @@ class FollowerSimulator:
 
     # Print a summary of the simulation
     def summary(self) -> None:
-        print("\n\n----- Simulation Summary -----")
-        print(f"Simulation cycles: {self.cycles}")
-        print(f"Initial followers: {self.initial_followers}")
-        print(f"Total new followers: {self.total_new_followers}")
+        print("\n\n-------- Simulation Summary --------")
+        print(f"Simulation cycles........: {self.cycles}")
+        print(f"Initial followers........: {self.initial_followers}")
+        print(f"Total new followers......: {self.total_new_followers}")
         print(f"Final number of followers: {self.current_followers}\n")
 
 
 # Signal handler for clean termination
-def signal_handler(signum: int, frame: None) -> None:
-    print(f'\r\033[K{current_line}')
-    exit(0)
+def signal_handler(simulator)-> None:
+    def handler(signum: int, frame: None):
+        print(f"\r\033[K{simulator.current_line}")
+        exit(0)
+    return handler
 
 # Main function
 def main() -> None:
@@ -94,7 +95,7 @@ def main() -> None:
     print(f'Starting with {args.initial_followers} followers.')
 
     # Register signal handler for clean termination
-    signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGINT, signal_handler(simulator))
 
     # Run simulation cycles
     try:

@@ -17,7 +17,8 @@ class TestFollowerSimulator(unittest.TestCase):
         self.assertEqual(self.simulator.random_range_start, 5)
         self.assertEqual(self.simulator.random_range_end, 10)
 
-    def test_simulate_cycle(self):
+    @patch('builtins.print')
+    def test_simulate_cycle(self, mock_print):
         self.assertEqual(self.simulator.current_followers, 100)
         self.simulator.simulate_cycle()
         self.assertEqual(self.simulator.cycles, 1)
@@ -34,10 +35,10 @@ class TestFollowerSimulator(unittest.TestCase):
     def test_summary(self):
         with patch('builtins.print') as mock_print:
             self.simulator.summary()
-            calls = [call("\n\n----- Simulation Summary -----"),
-                     call(f"Simulation cycles: {self.simulator.cycles}"),
-                     call(f"Initial followers: {self.simulator.initial_followers}"),
-                     call(f"Total new followers: {self.simulator.total_new_followers}"),
+            calls = [call("\n\n-------- Simulation Summary --------"),
+                     call(f"Simulation cycles........: {self.simulator.cycles}"),
+                     call(f"Initial followers........: {self.simulator.initial_followers}"),
+                     call(f"Total new followers......: {self.simulator.total_new_followers}"),
                      call(f"Final number of followers: {self.simulator.current_followers}\n")]
             mock_print.assert_has_calls(calls)
 
