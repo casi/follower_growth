@@ -1,6 +1,5 @@
 import argparse
 import random
-import signal
 import time
 
 
@@ -21,6 +20,7 @@ class FollowerSimulator:
 
     MIN_EVENT = 1
     MAX_EVENT = 100
+    SLEEP_TIME = 0.5
 
     def __init__(self, initial_followers: int, random_range_start: int, random_range_end: int) -> None:
         """
@@ -87,20 +87,6 @@ class FollowerSimulator:
         print(f"Final number of followers: {self.current_followers}\n")
 
 
-def signal_handler(simulator: FollowerSimulator)-> None:
-    """
-    Signal handler for clean termination. Prints the current line and exits the program.
-    It contains another function to handle the signal inside the handler.
-
-    Args:
-        simulator: The FollowerSimulator object.
-    """
-    def handler(signum: int, frame: None):
-        print(f"\r\033[K{simulator.current_line}")
-        exit(0)
-    return handler
-
-
 def main() -> None:
     """
     Main function to run the follower growth simulation.
@@ -123,14 +109,12 @@ def main() -> None:
     simulator = FollowerSimulator(args.initial_followers, args.random_range_start, args.random_range_end)
     print(f'Starting with {args.initial_followers} followers.')
 
-    signal.signal(signal.SIGINT, signal_handler(simulator))
-
     try:
         while args.cycles is None or simulator.cycles < args.cycles:
             simulator.simulate_cycle()
-            time.sleep(0.5)
-    except SystemExit:
-        pass
+            time.sleep(FollowerSimulator.SLEEP_TIME)
+    except KeyboardInterrupt:
+        print(f"\r\033[K{simulator.current_line}")
     finally:
         simulator.summary()
 
